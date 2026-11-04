@@ -1,0 +1,2044 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gestión de Notebooks</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --primary-light: #818cf8;
+            --success: #10b981;
+            --success-dark: #059669;
+            --warning: #f59e0b;
+            --warning-dark: #d97706;
+            --danger: #ef4444;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-700: #374151;
+            --gray-900: #111827;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+
+        body {
+            background: #f1f5f9;
+            min-height: 100vh;
+            padding: 16px;
+            color: var(--gray-900);
+            font-size: 14px;
+        }
+
+        .app-container { max-width: 1400px; margin: 0 auto; }
+
+        /* ===== SELECTOR DE ROL ===== */
+        .role-selector {
+            display: flex;
+            justify-content: center;
+            padding: 24px 16px;
+            min-height: 60vh;
+            align-items: center;
+        }
+
+        .role-card {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            max-width: 700px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .role-card h1 {
+            font-size: 26px;
+            color: var(--gray-900);
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .role-card .subtitle {
+            color: var(--gray-500);
+            font-size: 14px;
+            margin-bottom: 32px;
+        }
+
+        .role-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 600px) {
+            .role-options { grid-template-columns: 1fr; }
+        }
+
+        .role-btn {
+            background: white;
+            border: 2px solid var(--gray-200);
+            border-radius: 12px;
+            padding: 24px 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+            font-family: inherit;
+            color: inherit;
+        }
+
+        .role-btn:hover {
+            border-color: var(--primary);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.15);
+        }
+
+        .role-btn .role-icon {
+            font-size: 42px;
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        .role-btn .role-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: 6px;
+        }
+
+        .role-btn .role-desc {
+            font-size: 12px;
+            color: var(--gray-500);
+            line-height: 1.5;
+        }
+
+        .config-btn-selector {
+            background: var(--gray-100);
+            border: 1.5px solid var(--gray-200);
+            color: var(--gray-700);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            font-family: inherit;
+            transition: all 0.15s;
+        }
+
+        .config-btn-selector:hover { background: var(--gray-200); }
+
+        .selector-footer {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--gray-200);
+        }
+
+        /* ===== LOGIN ===== */
+        .login-view {
+            display: flex;
+            justify-content: center;
+            padding: 24px 16px;
+            min-height: 60vh;
+            align-items: center;
+        }
+
+        .login-card {
+            background: white;
+            border-radius: 16px;
+            padding: 36px 32px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            max-width: 420px;
+            width: 100%;
+        }
+
+        .login-card .login-icon {
+            font-size: 48px;
+            text-align: center;
+            margin-bottom: 12px;
+        }
+
+        .login-card h2 {
+            font-size: 22px;
+            text-align: center;
+            color: var(--gray-900);
+            margin-bottom: 6px;
+            font-weight: 700;
+        }
+
+        .login-card p.login-subtitle {
+            text-align: center;
+            color: var(--gray-500);
+            font-size: 13px;
+            margin-bottom: 24px;
+        }
+
+        .login-error {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 10px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            margin-bottom: 14px;
+            border-left: 3px solid var(--danger);
+            display: none;
+        }
+
+        .login-error.show { display: block; }
+
+        .login-card .form-group { margin-bottom: 14px; }
+
+        .login-card input {
+            padding: 11px 14px;
+            font-size: 14px;
+        }
+
+        .login-back {
+            text-align: center;
+            margin-top: 16px;
+        }
+
+        .login-back button {
+            background: none;
+            border: none;
+            color: var(--gray-500);
+            font-size: 12px;
+            cursor: pointer;
+            font-family: inherit;
+            text-decoration: underline;
+        }
+
+        .login-back button:hover { color: var(--primary); }
+
+        .login-hint {
+            background: #f0f9ff;
+            border: 1px solid #bae6fd;
+            border-radius: 8px;
+            padding: 10px 12px;
+            margin-top: 16px;
+            font-size: 11px;
+            color: #075985;
+            line-height: 1.5;
+        }
+
+        .login-hint strong { color: #0c4a6e; }
+
+        /* ===== HEADER ===== */
+        .app-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            box-shadow: var(--shadow-md);
+        }
+
+        .app-header h1 {
+            font-size: 18px;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 700;
+        }
+
+        .app-header .subtitle {
+            color: rgba(255,255,255,0.8);
+            font-size: 11px;
+            margin-top: 2px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.25);
+            border-radius: 8px;
+            padding: 4px 6px 4px 12px;
+            color: white;
+            font-size: 11px;
+        }
+
+        .user-info .avatar {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+        }
+
+        .user-info .user-data { line-height: 1.2; }
+        .user-info .user-name { font-weight: 700; font-size: 11px; }
+        .user-info .user-role { font-size: 9px; opacity: 0.8; text-transform: uppercase; letter-spacing: 0.4px; }
+
+        .user-info .btn-logout {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 22px;
+            height: 22px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 4px;
+            transition: background 0.15s;
+        }
+
+        .user-info .btn-logout:hover { background: rgba(255,255,255,0.35); }
+
+        .stats-inline { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+
+        .stat-pill {
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 8px;
+            padding: 6px 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: white;
+        }
+
+        .stat-pill .num { font-size: 18px; font-weight: 700; line-height: 1; }
+        .stat-pill .lbl {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            opacity: 0.85;
+            font-weight: 600;
+        }
+
+        .stat-pill.disponible { background: rgba(16,185,129,0.3); border-color: rgba(16,185,129,0.5); }
+        .stat-pill.pendiente { background: rgba(245,158,11,0.3); border-color: rgba(245,158,11,0.5); }
+        .stat-pill.en-uso { background: rgba(99,102,241,0.3); border-color: rgba(99,102,241,0.5); }
+
+        .conexion-estado {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 10px;
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 8px;
+            color: white;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+
+        .conexion-estado .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+        .conexion-estado.conectado .dot { background: #10b981; animation: pulse 2s infinite; }
+        .conexion-estado.desconectado .dot { background: #ef4444; }
+        .conexion-estado.verificando .dot { background: #f59e0b; animation: pulse 1s infinite; }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        .btn-cambiar-rol {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            font-family: inherit;
+            transition: all 0.15s;
+        }
+
+        .btn-cambiar-rol:hover { background: rgba(255,255,255,0.3); }
+
+        /* ===== LAYOUT ===== */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 340px 1fr;
+            gap: 16px;
+            align-items: start;
+        }
+
+        .main-grid.solo-formulario {
+            grid-template-columns: 1fr;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        @media (max-width: 960px) {
+            .main-grid { grid-template-columns: 1fr; }
+        }
+
+        .panel {
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--shadow-md);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panel-header {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--gray-200);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--gray-50);
+        }
+
+        .panel-header h2 {
+            font-size: 13px;
+            color: var(--gray-900);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .panel-body { padding: 16px; }
+
+        /* ===== FORMULARIO ===== */
+        .form-group { margin-bottom: 12px; }
+
+        label {
+            display: block;
+            font-weight: 600;
+            color: var(--gray-700);
+            margin-bottom: 4px;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        label .obligatorio { color: var(--danger); }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 9px 12px;
+            border: 1.5px solid var(--gray-200);
+            border-radius: 8px;
+            font-size: 13px;
+            transition: all 0.15s;
+            outline: none;
+            font-family: inherit;
+            background: white;
+        }
+
+        input:focus, textarea:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+        }
+
+        input[readonly] { background: var(--gray-50); color: var(--gray-500); cursor: not-allowed; }
+
+        textarea {
+            resize: vertical;
+            min-height: 70px;
+            max-height: 150px;
+            line-height: 1.4;
+        }
+
+        .char-count {
+            font-size: 10px;
+            color: var(--gray-400);
+            text-align: right;
+            margin-top: 3px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.15s;
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 15px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-primary:disabled { background: var(--gray-300); cursor: not-allowed; }
+
+        .btn-secondary { background: var(--gray-100); color: var(--gray-700); margin-top: 6px; }
+        .btn-secondary:hover { background: var(--gray-200); }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+            padding: 6px 12px;
+            font-size: 11px;
+            width: auto;
+        }
+        .btn-success:hover { background: var(--success-dark); transform: translateY(-1px); }
+
+        .btn-warning {
+            background: var(--warning);
+            color: white;
+            padding: 6px 12px;
+            font-size: 11px;
+            width: auto;
+        }
+        .btn-warning:hover { background: var(--warning-dark); transform: translateY(-1px); }
+
+        /* ===== ALERTA ===== */
+        .alert {
+            padding: 8px 12px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            font-size: 12px;
+            display: none;
+            align-items: center;
+            gap: 6px;
+            font-weight: 500;
+        }
+
+        .alert.show { display: flex; }
+        .alert.success { background: #d1fae5; color: #065f46; border-left: 3px solid var(--success); }
+        .alert.error { background: #fee2e2; color: #991b1b; border-left: 3px solid var(--danger); }
+        .alert.info { background: #dbeafe; color: #1e40af; border-left: 3px solid var(--primary); }
+
+        /* ===== INDICADOR ===== */
+        .inventario-indicador {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: var(--gray-50);
+            border-radius: 8px;
+            margin-bottom: 12px;
+            font-size: 12px;
+            font-weight: 500;
+            border: 1px solid var(--gray-200);
+        }
+
+        .inventario-indicador .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+            flex-shrink: 0;
+        }
+
+        .dot.verde { background: var(--success); }
+        .dot.amarillo { background: var(--warning); }
+        .dot.rojo { background: var(--danger); }
+
+        /* ===== TABS ===== */
+        .tabs {
+            display: flex;
+            gap: 4px;
+            padding: 4px;
+            background: var(--gray-100);
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 8px 4px;
+            text-align: center;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            color: var(--gray-500);
+            transition: all 0.15s;
+            border: none;
+            background: transparent;
+            font-family: inherit;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .tab.active {
+            background: white;
+            color: var(--primary);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .tab .count {
+            display: inline-block;
+            background: var(--gray-300);
+            color: white;
+            border-radius: 8px;
+            padding: 0 6px;
+            font-size: 10px;
+            margin-left: 3px;
+            line-height: 16px;
+        }
+
+        .tab.active .count { background: var(--primary); }
+
+        /* ===== LISTA ===== */
+        .lista-solicitudes {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: calc(100vh - 320px);
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+        .lista-solicitudes::-webkit-scrollbar { width: 5px; }
+        .lista-solicitudes::-webkit-scrollbar-thumb {
+            background: var(--gray-300);
+            border-radius: 3px;
+        }
+
+        .solicitud-card {
+            background: white;
+            border: 1.5px solid var(--gray-200);
+            border-radius: 10px;
+            padding: 10px 12px;
+            transition: all 0.15s;
+        }
+
+        .solicitud-card:hover {
+            border-color: var(--primary-light);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .solicitud-card.pendiente { border-left: 3px solid var(--warning); }
+        .solicitud-card.en-uso { border-left: 3px solid var(--primary); }
+        .solicitud-card.entregada { border-left: 3px solid var(--success); opacity: 0.85; }
+
+        .solicitud-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 6px;
+        }
+
+        .solicitud-nombre {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--gray-900);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .notebook-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            background: var(--gray-900);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 700;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 0.5px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 9px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+
+        .badge-pendiente { background: #fef3c7; color: #92400e; }
+        .badge-en-uso { background: #e0e7ff; color: #3730a3; }
+        .badge-entregada { background: #d1fae5; color: #065f46; }
+
+        .solicitud-justificacion {
+            font-size: 11px;
+            color: var(--gray-700);
+            background: var(--gray-50);
+            padding: 6px 10px;
+            border-radius: 6px;
+            margin-bottom: 6px;
+            line-height: 1.4;
+            font-style: italic;
+            border-left: 2px solid var(--gray-300);
+        }
+
+        .timeline {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            margin-bottom: 8px;
+            padding: 8px 10px;
+            background: var(--gray-50);
+            border-radius: 6px;
+            font-size: 10px;
+        }
+
+        .timeline-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--gray-700);
+        }
+
+        .timeline-item .t-icon {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 9px;
+            flex-shrink: 0;
+        }
+
+        .timeline-item.done .t-icon { background: var(--success); color: white; }
+        .timeline-item.active .t-icon { background: var(--warning); color: white; }
+
+        .timeline-item .t-info { color: var(--gray-500); font-size: 9px; margin-left: auto; }
+
+        .solicitud-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 32px 16px;
+            color: var(--gray-500);
+        }
+
+        .empty-state .empty-icon { font-size: 36px; margin-bottom: 8px; opacity: 0.4; }
+        .empty-state p { font-size: 12px; }
+
+        /* ===== MODAL ===== */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-overlay.show { display: flex; animation: fadeIn 0.15s; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .modal {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            max-width: 420px;
+            width: 100%;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.25);
+            animation: slideUp 0.2s;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(15px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal h3 {
+            font-size: 15px;
+            margin-bottom: 10px;
+            color: var(--gray-900);
+        }
+
+        .modal p {
+            font-size: 12px;
+            color: var(--gray-700);
+            margin-bottom: 14px;
+            line-height: 1.5;
+        }
+
+        .modal-info {
+            background: var(--gray-50);
+            padding: 10px 12px;
+            border-radius: 8px;
+            margin-bottom: 14px;
+            font-size: 12px;
+            border-left: 3px solid var(--primary);
+        }
+
+        .modal-info div { margin-bottom: 4px; }
+        .modal-info div:last-child { margin-bottom: 0; }
+        .modal-info strong { color: var(--gray-900); }
+
+        .modal-info.firma {
+            background: #fef3c7;
+            border-left-color: var(--warning);
+        }
+
+        .modal-acciones {
+            display: flex;
+            gap: 8px;
+        }
+
+        .modal-acciones .btn { flex: 1; }
+
+        .confirm-check {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            padding: 10px 12px;
+            background: #fef3c7;
+            border-radius: 8px;
+            margin-bottom: 14px;
+            cursor: pointer;
+            border: 1px solid #fde68a;
+        }
+
+        .confirm-check input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            margin-top: 1px;
+            cursor: pointer;
+            accent-color: var(--primary);
+            flex-shrink: 0;
+        }
+
+        .confirm-check label {
+            font-size: 11px;
+            color: #78350f;
+            text-transform: none;
+            letter-spacing: 0;
+            font-weight: 500;
+            cursor: pointer;
+            margin: 0;
+            line-height: 1.4;
+        }
+
+        .footer-note {
+            text-align: center;
+            color: var(--gray-400);
+            font-size: 11px;
+            margin-top: 12px;
+        }
+
+        /* ===== CONFIGURACIÓN ===== */
+        .config-panel {
+            background: #fef3c7;
+            border: 1px solid #fde68a;
+            border-radius: 8px;
+            padding: 10px 12px;
+            margin-bottom: 12px;
+            font-size: 11px;
+            color: #78350f;
+        }
+
+        .config-panel strong { color: #92400e; }
+        .config-panel input {
+            margin-top: 6px;
+            font-size: 11px;
+            padding: 6px 10px;
+        }
+        .config-panel .hint {
+            font-size: 10px;
+            color: #92400e;
+            margin-top: 4px;
+            line-height: 1.4;
+        }
+        .config-panel .config-actions {
+            display: flex;
+            gap: 6px;
+            margin-top: 6px;
+        }
+        .config-panel .config-actions .btn {
+            margin-top: 0;
+            padding: 6px;
+            font-size: 11px;
+        }
+
+        .view { display: none; }
+        .view.active { display: block; }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+
+        <!-- ===== VISTA: SELECTOR DE ROL ===== -->
+        <div id="vistaSelector" class="view active">
+            <div class="role-selector">
+                <div class="role-card">
+                    <h1>💻 Sistema de Gestión de Notebooks</h1>
+                    <p class="subtitle">Selecciona cómo deseas ingresar al sistema</p>
+                    <div class="role-options">
+                        <button class="role-btn" onclick="entrarComo('solicitante')">
+                            <span class="role-icon">👤</span>
+                            <div class="role-title">Soy Solicitante</div>
+                            <div class="role-desc">Solo puedo crear nuevas solicitudes de notebook</div>
+                        </button>
+                        <button class="role-btn" onclick="irALogin()">
+                            <span class="role-icon">🔑</span>
+                            <div class="role-title">Soy Responsable de Bodega</div>
+                            <div class="role-desc">Requiere usuario y contraseña para gestionar entregas</div>
+                        </button>
+                    </div>
+                    <div class="selector-footer">
+                        <div id="configPanelSelector" class="config-panel" style="display:none; text-align:left; margin-bottom:0;">
+                            <strong>⚙️ Configuración de Google Sheets</strong>
+                            <input type="text" id="urlScriptInputSelector" placeholder="https://script.google.com/macros/s/.../exec">
+                            <div class="config-actions">
+                                <button type="button" class="btn btn-primary" onclick="guardarUrlScript('selector')">💾 Guardar URL</button>
+                                <button type="button" class="btn btn-secondary" onclick="probarConexion('selector')">🔌 Probar conexión</button>
+                            </div>
+                            <div class="hint">Configura la URL para registrar acciones en Google Sheets.</div>
+                        </div>
+                        <button class="config-btn-selector" id="btnMostrarConfig" onclick="toggleConfigSelector()">⚙️ Configurar Google Sheets</button>
+                        <div style="margin-top:8px; font-size:10px; color:var(--gray-400);" id="estadoConfigSelector"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== VISTA: LOGIN BODEGA ===== -->
+        <div id="vistaLogin" class="view">
+            <div class="login-view">
+                <div class="login-card">
+                    <div class="login-icon">🔐</div>
+                    <h2>Acceso Bodega</h2>
+                    <p class="login-subtitle">Ingresa tus credenciales para gestionar entregas y devoluciones</p>
+
+                    <div id="loginError" class="login-error"></div>
+
+                    <form onsubmit="iniciarSesion(event)">
+                        <div class="form-group">
+                            <label for="loginUsuario">Usuario</label>
+                            <input type="text" id="loginUsuario" placeholder="Ej: admin" required autocomplete="username" autofocus>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="loginClave">Contraseña</label>
+                            <input type="password" id="loginClave" placeholder="••••••••" required autocomplete="current-password">
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">🔓 Iniciar sesión</button>
+                    </form>
+
+                    <div class="login-back">
+                        <button onclick="cambiarRol()">← Volver al selector de rol</button>
+                    </div>
+
+                    <div class="login-hint">
+                        <strong>Usuarios de prueba:</strong><br>
+                        • admin / admin123<br>
+                        • bodega / bodega123
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== VISTA: SOLICITANTE ===== -->
+        <div id="vistaSolicitante" class="view">
+            <header class="app-header">
+                <div>
+                    <h1>💻 Nueva Solicitud de Notebook</h1>
+                    <p class="subtitle">Modo Solicitante</p>
+                </div>
+                <div class="header-actions">
+                    <div id="conexionEstadoSol" class="conexion-estado desconectado">
+                        <span class="dot"></span>
+                        <span id="conexionTextoSol">Sin configurar</span>
+                    </div>
+                    <button class="btn-cambiar-rol" onclick="cambiarRol()">🔄 Cambiar rol</button>
+                </div>
+            </header>
+
+            <div class="main-grid solo-formulario">
+                <section class="panel">
+                    <div class="panel-header">
+                        <h2>📝 Formulario de Solicitud</h2>
+                    </div>
+                    <div class="panel-body">
+                        <div id="alertaSol" class="alert"></div>
+
+                        <div class="inventario-indicador">
+                            <span class="dot" id="dotInventarioSol"></span>
+                            <span id="textoInventarioSol">Cargando...</span>
+                        </div>
+
+                        <form id="formSolicitudSol" onsubmit="crearSolicitud(event, 'Sol')">
+                            <div class="form-group">
+                                <label for="nombreSol">Funcionario <span class="obligatorio">*</span></label>
+                                <input type="text" id="nombreSol" placeholder="Nombre completo" required maxlength="100" autocomplete="off">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="fechaSol">Fecha</label>
+                                <input type="date" id="fechaSol" readonly>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="justificacionSol">Justificación <span class="obligatorio">*</span></label>
+                                <textarea id="justificacionSol" placeholder="Motivo de la solicitud..." required maxlength="500" oninput="actualizarContador('Sol')"></textarea>
+                                <div class="char-count"><span id="contadorSol">0</span>/500</div>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary" id="btnCrearSol">📤 Enviar Solicitud</button>
+                            <button type="button" class="btn btn-secondary" onclick="limpiarFormulario('Sol')">🧹 Limpiar</button>
+                        </form>
+                    </div>
+                </section>
+            </div>
+
+            <p class="footer-note">Tu solicitud será revisada por el responsable de bodega</p>
+        </div>
+
+        <!-- ===== VISTA: BODEGA (COMPLETA) ===== -->
+        <div id="vistaBodega" class="view">
+            <header class="app-header">
+                <div>
+                    <h1>💻 Gestión de Notebooks</h1>
+                    <p class="subtitle">Modo Responsable de Bodega · Solicitud → Entrega → Devolución</p>
+                </div>
+                <div class="header-actions">
+                    <div id="conexionEstado" class="conexion-estado desconectado">
+                        <span class="dot"></span>
+                        <span id="conexionTexto">Sin configurar</span>
+                    </div>
+                    <div class="stats-inline" id="statsInline"></div>
+                    <div class="user-info" id="userInfo">
+                        <div class="avatar">👤</div>
+                        <div class="user-data">
+                            <div class="user-name" id="userName">—</div>
+                            <div class="user-role" id="userRole">bodega</div>
+                        </div>
+                        <button class="btn-logout" onclick="cerrarSesion()" title="Cerrar sesión">⏻</button>
+                    </div>
+                    <button class="btn-cambiar-rol" onclick="cambiarRol()">🔄 Cambiar rol</button>
+                </div>
+            </header>
+
+            <div class="main-grid">
+                <section class="panel">
+                    <div class="panel-header">
+                        <h2>📝 Nueva Solicitud</h2>
+                    </div>
+                    <div class="panel-body">
+                        <div id="alerta" class="alert"></div>
+
+                        <div class="config-panel" id="configPanel">
+                            <strong>⚙️ Configuración de Google Sheets</strong>
+                            <input type="text" id="urlScriptInput" placeholder="https://script.google.com/macros/s/.../exec">
+                            <div class="config-actions">
+                                <button type="button" class="btn btn-primary" onclick="guardarUrlScript('bodega')">💾 Guardar URL</button>
+                                <button type="button" class="btn btn-secondary" onclick="probarConexion('bodega')">🔌 Probar conexión</button>
+                            </div>
+                            <div class="hint">Pega aquí la URL de tu implementación de Google Apps Script.</div>
+                        </div>
+
+                        <div class="inventario-indicador">
+                            <span class="dot" id="dotInventario"></span>
+                            <span id="textoInventario">Cargando...</span>
+                        </div>
+
+                        <form id="formSolicitud" onsubmit="crearSolicitud(event, 'bod')">
+                            <div class="form-group">
+                                <label for="nombre">Funcionario <span class="obligatorio">*</span></label>
+                                <input type="text" id="nombre" placeholder="Nombre completo" required maxlength="100" autocomplete="off">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="fecha">Fecha</label>
+                                <input type="date" id="fecha" readonly>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="justificacion">Justificación <span class="obligatorio">*</span></label>
+                                <textarea id="justificacion" placeholder="Motivo de la solicitud..." required maxlength="500" oninput="actualizarContador('bod')"></textarea>
+                                <div class="char-count"><span id="contador">0</span>/500</div>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary" id="btnCrear">📤 Registrar</button>
+                            <button type="button" class="btn btn-secondary" onclick="limpiarFormulario('bod')">🧹 Limpiar</button>
+                        </form>
+                    </div>
+                </section>
+
+                <section class="panel">
+                    <div class="panel-header">
+                        <h2>📋 Gestión de Solicitudes</h2>
+                    </div>
+                    <div class="panel-body">
+                        <div class="tabs">
+                            <button class="tab active" data-tab="pendientes" onclick="cambiarTab('pendientes')">
+                                ⏳ Pendientes <span class="count" id="countPendientes">0</span>
+                            </button>
+                            <button class="tab" data-tab="en-uso" onclick="cambiarTab('en-uso')">
+                                🔵 En uso <span class="count" id="countEnUso">0</span>
+                            </button>
+                            <button class="tab" data-tab="cerradas" onclick="cambiarTab('cerradas')">
+                                ✅ Cerradas <span class="count" id="countCerradas">0</span>
+                            </button>
+                        </div>
+
+                        <div class="lista-solicitudes" id="listaSolicitudes"></div>
+                    </div>
+                </section>
+            </div>
+
+            <p class="footer-note">Los datos se almacenan localmente y se envían a Google Sheets como bitácora</p>
+        </div>
+
+    </div>
+
+    <!-- MODAL ENTREGA -->
+    <div class="modal-overlay" id="modalEntrega">
+        <div class="modal">
+            <h3>📦 Confirmar entrega al funcionario</h3>
+            <p>Confirme que está entregando el notebook al funcionario solicitante:</p>
+            <div class="modal-info firma">
+                <div><strong>Funcionario:</strong> <span id="entregaNombre"></span></div>
+                <div><strong>Notebook a entregar:</strong> <span id="entregaCodigo"></span></div>
+                <div><strong>Fecha solicitud:</strong> <span id="entregaFecha"></span></div>
+                <div><strong>Entrega realizada por:</strong> <span id="entregaUsuario"></span></div>
+            </div>
+            <label class="confirm-check">
+                <input type="checkbox" id="checkEntrega" onchange="validarCheckEntrega()">
+                <label for="checkEntrega">Confirmo que hice entrega física del notebook al funcionario solicitante y que el equipo se encuentra en buen estado.</label>
+            </label>
+            <div class="modal-acciones">
+                <button class="btn btn-secondary" onclick="cerrarModal('modalEntrega')">Cancelar</button>
+                <button class="btn btn-primary" id="btnConfirmarEntrega" onclick="confirmarEntrega()" disabled>✅ Confirmar entrega</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DEVOLUCIÓN -->
+    <div class="modal-overlay" id="modalDevolucion">
+        <div class="modal">
+            <h3>🔄 Confirmar devolución del notebook</h3>
+            <p>Confirme que el funcionario ha devuelto el notebook:</p>
+            <div class="modal-info firma">
+                <div><strong>Funcionario:</strong> <span id="devolucionNombre"></span></div>
+                <div><strong>Notebook devuelto:</strong> <span id="devolucionCodigo"></span></div>
+                <div><strong>Entregado el:</strong> <span id="devolucionFechaEntrega"></span></div>
+                <div><strong>Recepción por:</strong> <span id="devolucionUsuario"></span></div>
+            </div>
+            <label class="confirm-check">
+                <input type="checkbox" id="checkDevolucion" onchange="validarCheckDevolucion()">
+                <label for="checkDevolucion">Confirmo que recibí el notebook devuelto por el funcionario, en buen estado, y que queda disponible para una nueva asignación.</label>
+            </label>
+            <div class="modal-acciones">
+                <button class="btn btn-secondary" onclick="cerrarModal('modalDevolucion')">Cancelar</button>
+                <button class="btn btn-primary" id="btnConfirmarDevolucion" onclick="confirmarDevolucion()" disabled>✅ Confirmar devolución</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================================
+        // CONFIGURACIÓN
+        // ============================================================
+        const CONFIG = {
+            TOTAL_NOTEBOOKS: 4,
+            STORAGE_KEY: 'solicitudes_notebooks_v5',
+            URL_KEY: 'google_script_url',
+            ROL_KEY: 'rol_actual',
+            SESION_KEY: 'sesion_bodega',
+            // 👇 URL POR DEFECTO: pega aquí la URL de tu Apps Script publicado
+            DEFAULT_SCRIPT_URL: 'https://script.google.com/macros/s/TU_DEPLOYMENT_ID/exec'
+        };
+
+        // 👥 USUARIOS DE BODEGA (solo 2)
+        const USUARIOS = [
+            { usuario: 'admin',  clave: 'admin123',  nombre: 'Administrador',   rol: 'Administrador' },
+            { usuario: 'bodega', clave: 'bodega123', nombre: 'Encargado Bodega', rol: 'Bodega' }
+        ];
+
+        // Si hay una URL guardada en localStorage se usa esa; si no, la de por defecto.
+        let SCRIPT_URL = localStorage.getItem(CONFIG.URL_KEY) || CONFIG.DEFAULT_SCRIPT_URL || '';
+        let rolActual = localStorage.getItem(CONFIG.ROL_KEY) || null;
+
+        // ============================================================
+        // ESTADO
+        // ============================================================
+        let estado = {
+            notebooks: [],
+            solicitudes: [],
+            tabActiva: 'pendientes',
+            solicitudPendienteEntrega: null,
+            solicitudPendienteDevolucion: null,
+            usuarioLogueado: null,
+            conexionOk: false,
+            verificandoConexion: false
+        };
+
+        // ============================================================
+        // INICIALIZACIÓN
+        // ============================================================
+        document.addEventListener('DOMContentLoaded', () => {
+            inicializarNotebooks();
+            cargarDatos();
+            cargarSesion();
+            establecerFechaActual();
+            actualizarInputsUrl();
+            aplicarRol();
+            renderizarTodo();
+            verificarConexiones(); // ahora también hace ping real al script
+        });
+
+        // ============================================================
+        // SESIÓN
+        // ============================================================
+        function cargarSesion() {
+            try {
+                const sesion = localStorage.getItem(CONFIG.SESION_KEY);
+                if (sesion) {
+                    estado.usuarioLogueado = JSON.parse(sesion);
+                }
+            } catch (e) {
+                estado.usuarioLogueado = null;
+            }
+        }
+
+        function guardarSesion(user) {
+            estado.usuarioLogueado = user;
+            localStorage.setItem(CONFIG.SESION_KEY, JSON.stringify(user));
+        }
+
+        function cerrarSesion() {
+            estado.usuarioLogueado = null;
+            localStorage.removeItem(CONFIG.SESION_KEY);
+            localStorage.removeItem(CONFIG.ROL_KEY);
+            rolActual = null;
+            aplicarRol();
+        }
+
+        // ============================================================
+        // SISTEMA DE ROLES
+        // ============================================================
+        function entrarComo(rol) {
+            if (rol === 'bodega') {
+                irALogin();
+                return;
+            }
+            rolActual = rol;
+            localStorage.setItem(CONFIG.ROL_KEY, rol);
+            aplicarRol();
+        }
+
+        function irALogin() {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.getElementById('vistaLogin').classList.add('active');
+            document.getElementById('loginError').classList.remove('show');
+            document.getElementById('loginUsuario').value = '';
+            document.getElementById('loginClave').value = '';
+            setTimeout(() => document.getElementById('loginUsuario').focus(), 100);
+        }
+
+        function iniciarSesion(event) {
+            event.preventDefault();
+            const usuarioInput = document.getElementById('loginUsuario').value.trim();
+            const claveInput = document.getElementById('loginClave').value;
+            const errorEl = document.getElementById('loginError');
+
+            const user = USUARIOS.find(u => u.usuario === usuarioInput && u.clave === claveInput);
+
+            if (!user) {
+                errorEl.textContent = '❌ Usuario o contraseña incorrectos';
+                errorEl.classList.add('show');
+                document.getElementById('loginClave').value = '';
+                document.getElementById('loginClave').focus();
+                return;
+            }
+
+            guardarSesion({
+                usuario: user.usuario,
+                nombre: user.nombre,
+                rol: user.rol
+            });
+            rolActual = 'bodega';
+            localStorage.setItem(CONFIG.ROL_KEY, 'bodega');
+            errorEl.classList.remove('show');
+            aplicarRol();
+        }
+
+        function cambiarRol() {
+            localStorage.removeItem(CONFIG.ROL_KEY);
+            rolActual = null;
+            aplicarRol();
+        }
+
+        function aplicarRol() {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+
+            if (rolActual === 'bodega' && !estado.usuarioLogueado) {
+                rolActual = null;
+                localStorage.removeItem(CONFIG.ROL_KEY);
+                document.getElementById('vistaLogin').classList.add('active');
+                return;
+            }
+
+            if (rolActual === 'solicitante') {
+                document.getElementById('vistaSolicitante').classList.add('active');
+            } else if (rolActual === 'bodega') {
+                document.getElementById('vistaBodega').classList.add('active');
+                cargarUrlEnInputBodega();
+                actualizarUserInfo();
+            } else {
+                document.getElementById('vistaSelector').classList.add('active');
+                actualizarEstadoConfigSelector();
+            }
+
+            verificarConexiones();
+            renderizarTodo();
+        }
+
+        function actualizarUserInfo() {
+            const user = estado.usuarioLogueado;
+            if (!user) return;
+            document.getElementById('userName').textContent = user.nombre;
+            document.getElementById('userRole').textContent = user.rol;
+        }
+
+        // ============================================================
+        // CONFIGURACIÓN URL
+        // ============================================================
+        function toggleConfigSelector() {
+            const panel = document.getElementById('configPanelSelector');
+            const btn = document.getElementById('btnMostrarConfig');
+            if (panel.style.display === 'none') {
+                panel.style.display = 'block';
+                btn.textContent = '✖️ Cerrar configuración';
+            } else {
+                panel.style.display = 'none';
+                btn.textContent = '⚙️ Configurar Google Sheets';
+            }
+        }
+
+        function actualizarInputsUrl() {
+            const inputSel = document.getElementById('urlScriptInputSelector');
+            const inputBod = document.getElementById('urlScriptInput');
+            if (inputSel) inputSel.value = SCRIPT_URL;
+            if (inputBod) inputBod.value = SCRIPT_URL;
+        }
+
+        function cargarUrlEnInputBodega() {
+            const input = document.getElementById('urlScriptInput');
+            if (input) input.value = SCRIPT_URL;
+            if (SCRIPT_URL) {
+                const panel = document.getElementById('configPanel');
+                if (panel) panel.style.display = 'none';
+            }
+        }
+
+        function actualizarEstadoConfigSelector() {
+            const el = document.getElementById('estadoConfigSelector');
+            if (!el) return;
+            if (SCRIPT_URL) {
+                el.innerHTML = '🟢 <strong>URL configurada</strong> — Google Sheets conectado';
+                el.style.color = '#059669';
+            } else {
+                el.innerHTML = '🔴 <strong>Sin configurar</strong> — las acciones solo se guardan localmente';
+                el.style.color = '#ef4444';
+            }
+        }
+
+        function guardarUrlScript(origen) {
+            const inputId = origen === 'selector' ? 'urlScriptInputSelector' : 'urlScriptInput';
+            const url = document.getElementById(inputId).value.trim();
+
+            if (!url) { alert('⚠️ Debes ingresar una URL válida'); return; }
+            if (!url.startsWith('https://script.google.com/')) {
+                alert('⚠️ La URL debe ser de Google Apps Script (script.google.com)');
+                return;
+            }
+
+            SCRIPT_URL = url;
+            localStorage.setItem(CONFIG.URL_KEY, url);
+            actualizarInputsUrl();
+            verificarConexiones();
+            actualizarEstadoConfigSelector();
+
+            if (origen === 'bodega') {
+                document.getElementById('configPanel').style.display = 'none';
+                mostrarAlerta('✅ URL configurada correctamente', 'success', 'bod');
+            } else {
+                document.getElementById('configPanelSelector').style.display = 'none';
+                document.getElementById('btnMostrarConfig').textContent = '⚙️ Configurar Google Sheets';
+                alert('✅ URL configurada correctamente');
+            }
+        }
+
+        // ============================================================
+        // VERIFICAR CONEXIONES
+        // ============================================================
+        function setEstadoConexion(clase, texto, idEstado, idTexto) {
+            const el = document.getElementById(idEstado);
+            const txt = document.getElementById(idTexto);
+            if (!el || !txt) return;
+            el.className = 'conexion-estado ' + clase;
+            txt.textContent = texto;
+        }
+
+        async function verificarConexiones() {
+            // Primero, estado visual inmediato según si hay URL
+            if (!SCRIPT_URL) {
+                setEstadoConexion('desconectado', 'Sin configurar', 'conexionEstado', 'conexionTexto');
+                setEstadoConexion('desconectado', 'Sin configurar', 'conexionEstadoSol', 'conexionTextoSol');
+                estado.conexionOk = false;
+                return;
+            }
+
+            setEstadoConexion('verificando', 'Verificando...', 'conexionEstado', 'conexionTexto');
+            setEstadoConexion('verificando', 'Verificando...', 'conexionEstadoSol', 'conexionTextoSol');
+
+            const ok = await probarConexionSilenciosa();
+            if (ok) {
+                setEstadoConexion('conectado', 'Conectado', 'conexionEstado', 'conexionTexto');
+                setEstadoConexion('conectado', 'Conectado', 'conexionEstadoSol', 'conexionTextoSol');
+            } else {
+                setEstadoConexion('desconectado', 'Sin conexión', 'conexionEstado', 'conexionTexto');
+                setEstadoConexion('desconectado', 'Sin conexión', 'conexionEstadoSol', 'conexionTextoSol');
+            }
+        }
+
+        async function probarConexionSilenciosa() {
+            if (!SCRIPT_URL) return false;
+            try {
+                const url = SCRIPT_URL + (SCRIPT_URL.includes('?') ? '&' : '?') + 'ping=1&t=' + Date.now();
+                const res = await fetch(url, { method: 'GET', cache: 'no-store' });
+                if (!res.ok) return false;
+                let data = null;
+                try { data = await res.json(); } catch (_) { /* si no es JSON, igual asumimos ok si el status es 200 */ }
+                estado.conexionOk = true;
+                return true;
+            } catch (e) {
+                estado.conexionOk = false;
+                return false;
+            }
+        }
+
+        async function probarConexion(origen) {
+            const vista = origen === 'bodega' ? 'bod' : 'Sol';
+            if (!SCRIPT_URL) {
+                alert('⚠️ Primero configura la URL del script');
+                return;
+            }
+            try {
+                const url = SCRIPT_URL + (SCRIPT_URL.includes('?') ? '&' : '?') + 'ping=1&t=' + Date.now();
+                const res = await fetch(url, { method: 'GET', cache: 'no-store' });
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                await verificarConexiones();
+                mostrarAlerta('✅ Conexión con Google Sheets verificada correctamente', 'success', vista);
+            } catch (e) {
+                await verificarConexiones();
+                mostrarAlerta('❌ No se pudo conectar con Google Sheets. Revisa la URL y la publicación del script.', 'error', vista);
+            }
+        }
+
+        // ============================================================
+        // NOTEBOOKS Y FECHAS
+        // ============================================================
+        function inicializarNotebooks() {
+            if (estado.notebooks.length === 0) {
+                for (let i = 1; i <= CONFIG.TOTAL_NOTEBOOKS; i++) {
+                    estado.notebooks.push({
+                        codigo: String(i).padStart(4, '0'),
+                        estado: 'disponible',
+                        solicitudId: null
+                    });
+                }
+            }
+        }
+
+        function establecerFechaActual() {
+            const hoy = new Date();
+            const fecha = `${hoy.getFullYear()}-${String(hoy.getMonth()+1).padStart(2,'0')}-${String(hoy.getDate()).padStart(2,'0')}`;
+            const f1 = document.getElementById('fecha');
+            const f2 = document.getElementById('fechaSol');
+            if (f1) f1.value = fecha;
+            if (f2) f2.value = fecha;
+        }
+
+        // ============================================================
+        // PERSISTENCIA
+        // ============================================================
+        function guardarDatos() {
+            try {
+                localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify({
+                    notebooks: estado.notebooks,
+                    solicitudes: estado.solicitudes
+                }));
+            } catch (e) { console.warn(e); }
+        }
+
+        function cargarDatos() {
+            try {
+                const guardado = localStorage.getItem(CONFIG.STORAGE_KEY);
+                if (guardado) {
+                    const data = JSON.parse(guardado);
+                    estado.notebooks = data.notebooks || [];
+                    estado.solicitudes = data.solicitudes || [];
+                }
+                if (estado.notebooks.length !== CONFIG.TOTAL_NOTEBOOKS) {
+                    estado.notebooks = [];
+                    inicializarNotebooks();
+                }
+            } catch (e) {
+                estado.notebooks = [];
+                estado.solicitudes = [];
+                inicializarNotebooks();
+            }
+        }
+
+        // ============================================================
+        // GOOGLE SHEETS
+        // ============================================================
+        async function registrarEnBitacora(accion, funcionario, notebook, detalle, fecha, vista) {
+            if (!SCRIPT_URL) {
+                console.warn('⚠️ URL no configurada.');
+                mostrarAlerta('⚠️ Google Sheets no configurado. El registro se guardó solo localmente.', 'error', vista);
+                return false;
+            }
+
+            const payload = {
+                accion: accion,
+                funcionario: funcionario,
+                notebook: notebook,
+                detalle: detalle,
+                fecha: fecha,
+                hora: new Date().toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' }),
+                usuario: estado.usuarioLogueado ? estado.usuarioLogueado.usuario : 'solicitante'
+            };
+
+            try {
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await response.json();
+                if (data.result === 'success') {
+                    console.log('✅ Registrado en bitácora:', payload);
+                    return true;
+                } else {
+                    console.warn('⚠️ Error:', data);
+                    mostrarAlerta('⚠️ Google Sheets respondió con error. El registro se guardó localmente.', 'error', vista);
+                    return false;
+                }
+            } catch (error) {
+                console.error('❌ Error:', error);
+                mostrarAlerta('⚠️ No se pudo conectar a Google Sheets. El registro se guardó localmente.', 'error', vista);
+                return false;
+            }
+        }
+
+        // ============================================================
+        // HELPERS
+        // ============================================================
+        const getDisponibles = () => estado.notebooks.filter(n => n.estado === 'disponible');
+        const getPorEstado = (e) => estado.solicitudes.filter(s => s.estado === e);
+
+        function escapeHtml(t) {
+            const d = document.createElement('div');
+            d.textContent = t;
+            return d.innerHTML;
+        }
+
+        function formatearFecha(f) {
+            if (!f) return '';
+            const [a, m, d] = f.split('-');
+            return `${d}/${m}/${a}`;
+        }
+
+        function ahora() {
+            const d = new Date();
+            return {
+                fecha: `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`,
+                hora: d.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' })
+            };
+        }
+
+        function mostrarAlerta(msg, tipo, vista) {
+            const id = vista === 'Sol' ? 'alertaSol' : 'alerta';
+            const a = document.getElementById(id);
+            if (!a) return;
+            a.textContent = msg;
+            a.className = `alert show ${tipo}`;
+            clearTimeout(a._t);
+            a._t = setTimeout(() => a.className = 'alert', 5000);
+        }
+
+        function actualizarContador(vista) {
+            if (vista === 'Sol') {
+                const el = document.getElementById('contadorSol');
+                const ta = document.getElementById('justificacionSol');
+                if (el && ta) el.textContent = ta.value.length;
+            } else {
+                const el = document.getElementById('contador');
+                const ta = document.getElementById('justificacion');
+                if (el && ta) el.textContent = ta.value.length;
+            }
+        }
+
+        // ============================================================
+        // RENDERIZADO
+        // ============================================================
+        function renderizarTodo() {
+            if (rolActual === 'bodega') {
+                renderizarStats();
+                renderizarContadores();
+                renderizarLista();
+                actualizarBoton('bod');
+                renderizarIndicador('bod');
+            } else if (rolActual === 'solicitante') {
+                renderizarIndicador('Sol');
+                actualizarBoton('Sol');
+            }
+        }
+
+        function renderizarStats() {
+            const el = document.getElementById('statsInline');
+            if (!el) return;
+            el.innerHTML = `
+                <div class="stat-pill disponible">
+                    <span class="num">${getDisponibles().length}</span>
+                    <span class="lbl">Disponibles</span>
+                </div>
+                <div class="stat-pill pendiente">
+                    <span class="num">${getPorEstado('pendiente').length}</span>
+                    <span class="lbl">Pendientes</span>
+                </div>
+                <div class="stat-pill en-uso">
+                    <span class="num">${getPorEstado('en-uso').length}</span>
+                    <span class="lbl">En uso</span>
+                </div>
+            `;
+        }
+
+        function renderizarIndicador(vista) {
+            const disp = getDisponibles().length;
+
+            if (vista === 'Sol') {
+                const dot = document.getElementById('dotInventarioSol');
+                const txt = document.getElementById('textoInventarioSol');
+                if (!dot || !txt) return;
+                if (disp === 0) {
+                    dot.className = 'dot rojo';
+                    txt.textContent = 'Sin notebooks disponibles en este momento';
+                } else if (disp === 1) {
+                    dot.className = 'dot amarillo';
+                    txt.textContent = 'Solo queda 1 notebook disponible';
+                } else {
+                    dot.className = 'dot verde';
+                    txt.textContent = `${disp} notebooks disponibles`;
+                }
+            } else {
+                const dot = document.getElementById('dotInventario');
+                const txt = document.getElementById('textoInventario');
+                if (!dot || !txt) return;
+                if (disp === 0) {
+                    dot.className = 'dot rojo';
+                    txt.textContent = 'Sin notebooks disponibles';
+                } else if (disp === 1) {
+                    dot.className = 'dot amarillo';
+                    txt.textContent = 'Solo queda 1 notebook disponible';
+                } else {
+                    dot.className = 'dot verde';
+                    txt.textContent = `${disp} notebooks disponibles`;
+                }
+            }
+        }
+
+        function actualizarBoton(vista) {
+            const disp = getDisponibles().length;
+            if (vista === 'Sol') {
+                const btn = document.getElementById('btnCrearSol');
+                if (!btn) return;
+                if (disp === 0) {
+                    btn.disabled = true;
+                    btn.textContent = '⛔ Sin equipos';
+                } else {
+                    btn.disabled = false;
+                    btn.textContent = '📤 Enviar Solicitud';
+                }
+            } else {
+                const btn = document.getElementById('btnCrear');
+                if (!btn) return;
+                if (disp === 0) {
+                    btn.disabled = true;
+                    btn.textContent = '⛔ Sin equipos';
+                } else {
+                    btn.disabled = false;
+                    btn.textContent = '📤 Registrar';
+                }
+            }
+        }
+
+        function renderizarContadores() {
+            const c1 = document.getElementById('countPendientes');
+            const c2 = document.getElementById('countEnUso');
+            const c3 = document.getElementById('countCerradas');
+            if (c1) c1.textContent = getPorEstado('pendiente').length;
+            if (c2) c2.textContent = getPorEstado('en-uso').length;
+            if (c3) c3.textContent = getPorEstado('cerrada').length;
+        }
+
+        function renderizarLista() {
+            const cont = document.getElementById('listaSolicitudes');
+            if (!cont) return;
+
+            const mapa = { 'pendientes': 'pendiente', 'en-uso': 'en-uso', 'cerradas': 'cerrada' };
+            const filtro = mapa[estado.tabActiva];
+            const lista = getPorEstado(filtro);
+
+            if (lista.length === 0) {
+                const icons = { pendientes: '📭', 'en-uso': '💻', cerradas: '📦' };
+                const msgs = {
+                    pendientes: 'No hay solicitudes pendientes',
+                    'en-uso': 'No hay notebooks en uso',
+                    cerradas: 'Aún no hay solicitudes cerradas'
+                };
+                cont.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">${icons[estado.tabActiva]}</div>
+                        <p>${msgs[estado.tabActiva]}</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const ordenadas = [...lista].sort((a, b) => b.id - a.id);
+
+            cont.innerHTML = ordenadas.map(sol => {
+                const clase = sol.estado === 'pendiente' ? 'pendiente'
+                            : sol.estado === 'en-uso' ? 'en-uso' : 'entregada';
+
+                const badges = {
+                    pendiente: '<span class="badge badge-pendiente">⏳ Pendiente</span>',
+                    'en-uso': '<span class="badge badge-en-uso">🔵 En uso</span>',
+                    cerrada: '<span class="badge badge-entregada">✅ Cerrada</span>'
+                };
+
+                const timeline = [];
+                timeline.push(`
+                    <div class="timeline-item done">
+                        <span class="t-icon">✓</span>
+                        <span>Solicitado por <strong>${escapeHtml(sol.nombre)}</strong></span>
+                        <span class="t-info">${formatearFecha(sol.fecha)} ${sol.horaSolicitud || ''}</span>
+                    </div>
+                `);
+
+                if (sol.estado === 'pendiente') {
+                    timeline.push(`
+                        <div class="timeline-item active">
+                            <span class="t-icon">⏳</span>
+                            <span>Esperando confirmación de entrega</span>
+                        </div>
+                    `);
+                } else {
+                    timeline.push(`
+                        <div class="timeline-item done">
+                            <span class="t-icon">✓</span>
+                            <span>Entregado por <strong>${escapeHtml(sol.entregaPor || 'Responsable')}</strong></span>
+                            <span class="t-info">${formatearFecha(sol.fechaEntrega)} ${sol.horaEntrega || ''}</span>
+                        </div>
+                    `);
+                }
+
+                if (sol.estado === 'en-uso') {
+                    timeline.push(`
+                        <div class="timeline-item active">
+                            <span class="t-icon">⏳</span>
+                            <span>En uso · esperando devolución</span>
+                        </div>
+                    `);
+                } else if (sol.estado === 'cerrada') {
+                    timeline.push(`
+                        <div class="timeline-item done">
+                            <span class="t-icon">✓</span>
+                            <span>Devuelto por <strong>${escapeHtml(sol.devolucionPor || 'Responsable')}</strong></span>
+                            <span class="t-info">${formatearFecha(sol.fechaDevolucion)} ${sol.horaDevolucion || ''}</span>
+                        </div>
+                    `);
+                }
+
+                let acciones = '';
+                if (sol.estado === 'pendiente') {
+                    acciones = `<button class="btn btn-success" onclick="abrirModalEntrega(${sol.id})">📦 Confirmar entrega</button>`;
+                } else if (sol.estado === 'en-uso') {
+                    acciones = `<button class="btn btn-warning" onclick="abrirModalDevolucion(${sol.id})">🔄 Confirmar devolución</button>`;
+                } else {
+                    acciones = `<span style="font-size:10px;color:var(--gray-500);">✓ Ciclo completado</span>`;
+                }
+
+                return `
+                    <div class="solicitud-card ${clase}">
+                        <div class="solicitud-top">
+                            <div class="solicitud-nombre">
+                                ${escapeHtml(sol.nombre)}
+                                <span class="notebook-tag">#${sol.codigo}</span>
+                            </div>
+                            ${badges[sol.estado]}
+                        </div>
+                        <div class="solicitud-justificacion">"${escapeHtml(sol.justificacion)}"</div>
+                        <div class="timeline">${timeline.join('')}</div>
+                        <div class="solicitud-footer">
+                            <span></span>
+                            ${acciones}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ============================================================
+        // ACCIONES
+        // ============================================================
+        async function crearSolicitud(e, vista) {
+            e.preventDefault();
+
+            const esSol = vista === 'Sol';
+            const nombre = document.getElementById(esSol ? 'nombreSol' : 'nombre').value.trim();
+            const just = document.getElementById(esSol ? 'justificacionSol' : 'justificacion').value.trim();
+
+            if (!nombre) return mostrarAlerta('⚠️ Ingrese el nombre del funcionario', 'error', vista);
+            if (!just) return mostrarAlerta('⚠️ Ingrese la justificación', 'error', vista);
+
+            const disp = getDisponibles();
+            if (disp.length === 0) return mostrarAlerta('⛔ Sin notebooks disponibles', 'error', vista);
+
+            const nb = disp[0];
+            const t = ahora();
+
+            const sol = {
+                id: Date.now(),
+                nombre,
+                fecha: document.getElementById(esSol ? 'fechaSol' : 'fecha').value,
+                justificacion: just,
+                codigo: nb.codigo,
+                estado: 'pendiente',
+                horaSolicitud: t.hora,
+                origen: esSol ? 'solicitante' : 'bodega'
+            };
+
+            nb.estado = 'reservado';
+            nb.solicitudId = sol.id;
+            estado.solicitudes.push(sol);
+            guardarDatos();
+            renderizarTodo();
+
+            await registrarEnBitacora('Solicitud', nombre, nb.codigo, just, sol.fecha, vista);
+
+            mostrarAlerta(`✅ Solicitud registrada · Notebook #${nb.codigo}`, 'success', vista);
+            limpiarFormulario(vista);
+
+            if (!esSol) cambiarTab('pendientes');
+        }
+
+        function limpiarFormulario(vista) {
+            if (vista === 'Sol') {
+                document.getElementById('nombreSol').value = '';
+                document.getElementById('justificacionSol').value = '';
+                document.getElementById('contadorSol').textContent = '0';
+                establecerFechaActual();
+                document.getElementById('nombreSol').focus();
+            } else {
+                document.getElementById('nombre').value = '';
+                document.getElementById('justificacion').value = '';
+                document.getElementById('contador').textContent = '0';
+                establecerFechaActual();
+                document.getElementById('nombre').focus();
+            }
+        }
+
+        function cambiarTab(tab) {
+            estado.tabActiva = tab;
+            document.querySelectorAll('.tab').forEach(t =>
+                t.classList.toggle('active', t.dataset.tab === tab)
+            );
+            renderizarLista();
+        }
+
+        // ============================================================
+        // MODAL ENTREGA
+        // ============================================================
+        function abrirModalEntrega(id) {
+            const sol = estado.solicitudes.find(s => s.id === id);
+            if (!sol) return;
+            estado.solicitudPendienteEntrega = sol;
+            document.getElementById('entregaNombre').textContent = sol.nombre;
+            document.getElementById('entregaCodigo').textContent = `#${sol.codigo}`;
+            document.getElementById('entregaFecha').textContent = formatearFecha(sol.fecha);
+            document.getElementById('entregaUsuario').textContent =
+                estado.usuarioLogueado ? `${estado.usuarioLogueado.nombre} (${estado.usuarioLogueado.usuario})` : '—';
+            document.getElementById('checkEntrega').checked = false;
+            document.getElementById('btnConfirmarEntrega').disabled = true;
+            document.getElementById('modalEntrega').classList.add('show');
+        }
+
+        function validarCheckEntrega() {
+            document.getElementById('btnConfirmarEntrega').disabled =
+                !document.getElementById('checkEntrega').checked;
+        }
+
+        async function confirmarEntrega() {
+            const sol = estado.solicitudPendienteEntrega;
+            if (!sol || !document.getElementById('checkEntrega').checked) return;
+
+            const t = ahora();
+            sol.estado = 'en-uso';
+            sol.fechaEntrega = t.fecha;
+            sol.horaEntrega = t.hora;
+            sol.entregaPor = estado.usuarioLogueado ? estado.usuarioLogueado.nombre : 'Responsable';
+
+            const nb = estado.notebooks.find(n => n.codigo === sol.codigo);
+            if (nb) nb.estado = 'en-uso';
+
+            guardarDatos();
+            renderizarTodo();
+
+            await registrarEnBitacora(
+                'Entrega',
+                sol.nombre,
+                sol.codigo,
+                `Notebook entregado por ${sol.entregaPor}. Justificación: ${sol.justificacion}`,
+                sol.fechaEntrega,
+                'bod'
+            );
+
+            mostrarAlerta(`✅ Notebook #${sol.codigo} entregado a ${sol.nombre}`, 'success', 'bod');
+            cerrarModal('modalEntrega');
+        }
+
+        // ============================================================
+        // MODAL DEVOLUCIÓN
+        // ============================================================
+        function abrirModalDevolucion(id) {
+            const sol = estado.solicitudes.find(s => s.id === id);
+            if (!sol) return;
+            estado.solicitudPendienteDevolucion = sol;
+            document.getElementById('devolucionNombre').textContent = sol.nombre;
+            document.getElementById('devolucionCodigo').textContent = `#${sol.codigo}`;
+            document.getElementById('devolucionFechaEntrega').textContent =
+                `${formatearFecha(sol.fechaEntrega)} ${sol.horaEntrega || ''}`;
+            document.getElementById('devolucionUsuario').textContent =
+                estado.usuarioLogueado ? `${estado.usuarioLogueado.nombre} (${estado.usuarioLogueado.usuario})` : '—';
+            document.getElementById('checkDevolucion').checked = false;
+            document.getElementById('btnConfirmarDevolucion').disabled = true;
+            document.getElementById('modalDevolucion').classList.add('show');
+        }
+
+        function validarCheckDevolucion() {
+            document.getElementById('btnConfirmarDevolucion').disabled =
+                !document.getElementById('checkDevolucion').checked;
+        }
+
+        async function confirmarDevolucion() {
+            const sol = estado.solicitudPendienteDevolucion;
+            if (!sol || !document.getElementById('checkDevolucion').checked) return;
+
+            const t = ahora();
+            sol.estado = 'cerrada';
+            sol.fechaDevolucion = t.fecha;
+            sol.horaDevolucion = t.hora;
+            sol.devolucionPor = estado.usuarioLogueado ? estado.usuarioLogueado.nombre : 'Responsable';
+
+            const nb = estado.notebooks.find(n => n.codigo === sol.codigo);
+            if (nb) {
+                nb.estado = 'disponible';
+                nb.solicitudId = null;
+            }
+
+            guardarDatos();
+            renderizarTodo();
+
+            await registrarEnBitacora(
+                'Devolucion',
+                sol.nombre,
+                sol.codigo,
+                `Notebook devuelto y recibido por ${sol.devolucionPor}. Equipo disponible nuevamente.`,
+                sol.fechaDevolucion,
+                'bod'
+            );
+
+            mostrarAlerta(`✅ Notebook #${sol.codigo} devuelto y disponible`, 'success', 'bod');
+            cerrarModal('modalDevolucion');
+        }
+
+        function cerrarModal(id) {
+            document.getElementById(id).classList.remove('show');
+            estado.solicitudPendienteEntrega = null;
+            estado.solicitudPendienteDevolucion = null;
+        }
+
+        document.querySelectorAll('.modal-overlay').forEach(m => {
+            m.addEventListener('click', e => {
+                if (e.target === m) cerrarModal(m.id);
+            });
+        });
+
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') {
+                cerrarModal('modalEntrega');
+                cerrarModal('modalDevolucion');
+            }
+        });
+    </script>
+</body>
+</html>
