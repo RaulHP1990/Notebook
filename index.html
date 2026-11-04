@@ -419,7 +419,7 @@
         // ============================================================
         const CONFIG = {
             TOTAL_NOTEBOOKS: 4,
-            STORAGE_KEY: 'solicitudes_notebooks_v6',
+            STORAGE_KEY: 'solicitudes_notebooks_v7',
             URL_KEY: 'google_script_url',
             ROL_KEY: 'rol_actual',
             SESION_KEY: 'sesion_bodega',
@@ -455,6 +455,8 @@
             cargarSesion();
             establecerFechaActual();
             actualizarInputsUrl();
+            // Inicializa el estado local con 4 disponibles antes de sincronizar
+            estado.disponibles = calcularDisponiblesLocal(CONFIG.TOTAL_NOTEBOOKS, []);
             aplicarRol();
             sincronizarConServidor(true);
         });
@@ -519,6 +521,7 @@
             localStorage.setItem(CONFIG.ROL_KEY, 'bodega');
             errorEl.classList.remove('show');
             aplicarRol();
+            sincronizarConServidor(false);
         }
 
         function cambiarRol() {
@@ -680,6 +683,24 @@
         }
 
         // ============================================================
+        // CÁLCULO LOCAL DE DISPONIBLES (RESPALDO)
+        // ============================================================
+        function calcularDisponiblesLocal(total, solicitudes) {
+            const ocupados = new Set();
+            (solicitudes || []).forEach(s => {
+                if (s.estado === 'pendiente' || s.estado === 'en-uso') {
+                    ocupados.add(String(s.codigo).padStart(4, '0'));
+                }
+            });
+            const disp = [];
+            for (let i = 1; i <= total; i++) {
+                const cod = String(i).padStart(4, '0');
+                if (!ocupados.has(cod)) disp.push(cod);
+            }
+            return disp;
+        }
+
+        // ============================================================
         // SINCRONIZACIÓN CON EL SERVIDOR (GOOGLE SHEETS)
         // ============================================================
         async function sincronizarConServidor(mostrarFeedback) {
@@ -697,10 +718,17 @@
                 if (data.error) throw new Error(data.error);
 
                 estado.solicitudes = data.solicitudes || [];
-                estado.disponibles = data.disponibles || [];
+
+                const total = (typeof data.total === 'number') ? data.total : CONFIG.TOTAL_NOTEBOOKS;
+                // Si el servidor devuelve disponibles válidos, usarlos; si no, recalcular localmente.
+                if (Array.isArray(data.disponibles) && (data.disponibles.length > 0 || estado.solicitudes.length === 0)) {
+                    estado.disponibles = data.disponibles;
+                } else {
+                    estado.disponibles = calcularDisponiblesLocal(total, estado.solicitudes);
+                }
+
                 estado.conexionOk = true;
 
-                // Guardar copia local como respaldo
                 try {
                     localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify({
                         solicitudes: estado.solicitudes,
@@ -710,13 +738,13 @@
 
                 if (syncEl) syncEl.textContent = '✅ Sincronizado — ' + new Date().toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' });
                 renderizarTodo();
+
                 if (mostrarFeedback && rolActual) {
-                    // feedback silencioso al sincronizar
+                    // feedback silencioso
                 }
             } catch (e) {
                 console.warn('Error sincronizando:', e);
                 estado.conexionOk = false;
-                // Fallback: usar caché local
                 cargarCacheLocal();
                 if (syncEl) syncEl.textContent = '⚠️ Sin conexión — mostrando datos locales';
                 renderizarTodo();
@@ -734,9 +762,17 @@
                 if (guardado) {
                     const data = JSON.parse(guardado);
                     estado.solicitudes = data.solicitudes || [];
-                    estado.disponibles = data.disponibles || [];
+                    estado.disponibles = (Array.isArray(data.disponibles) && data.disponibles.length > 0)
+                        ? data.disponibles
+                        : calcularDisponiblesLocal(CONFIG.TOTAL_NOTEBOOKS, estado.solicitudes);
+                } else {
+                    estado.solicitudes = [];
+                    estado.disponibles = calcularDisponiblesLocal(CONFIG.TOTAL_NOTEBOOKS, []);
                 }
-            } catch (e) { /* ignorar */ }
+            } catch (e) {
+                estado.solicitudes = [];
+                estado.disponibles = calcularDisponiblesLocal(CONFIG.TOTAL_NOTEBOOKS, []);
+            }
         }
 
         // ============================================================
@@ -832,7 +868,6 @@
 
         function renderizarIndicador(vista) {
             const disp = estado.disponibles.length;
-            const suffix = vista === 'Sol' ? 'Sol' : '';
             const dot = document.getElementById(vista === 'Sol' ? 'dotInventarioSol' : 'dotInventario');
             const txt = document.getElementById(vista === 'Sol' ? 'textoInventarioSol' : 'textoInventario');
             if (!dot || !txt) return;
@@ -972,7 +1007,6 @@
             if (estado.disponibles.length === 0) return mostrarAlerta('⛔ Sin notebooks disponibles', 'error', vista);
 
             const codigo = estado.disponibles[0];
-            const t = ahora();
             const fecha = document.getElementById(esSol ? 'fechaSol' : 'fecha').value;
 
             const btn = document.getElementById(esSol ? 'btnCrearSol' : 'btnCrear');
